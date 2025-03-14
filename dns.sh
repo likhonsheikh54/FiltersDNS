@@ -1,6 +1,6 @@
 #!/bin/bash
-# FilterDNS - Complete Setup Script
-# This script finalizes the DNS filtering server setup and prepares the web interface
+# FilterDNS - Complete All-in-One Setup Script with Nginx
+# This script sets up a fully functional DNS filtering server with web interface and Nginx
 
 # Text formatting
 BOLD='\033[1m'
@@ -30,7 +30,19 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-print_status "Starting FilterDNS complete setup..."
+print_status "Starting FilterDNS complete setup with Nginx..."
+
+# Update system packages
+print_status "Updating system packages..."
+apt update || print_warning "Some repositories could not be updated. Continuing anyway..."
+apt upgrade -y || print_warning "Some packages could not be upgraded. Continuing anyway..."
+
+# Install required packages
+print_status "Installing required packages..."
+apt install -y bind9 bind9utils dnsutils curl wget jq python3 python3-pip unzip nginx certbot python3-certbot-nginx fail2ban ufw || {
+  print_error "Failed to install required packages. Please check your internet connection and try again."
+  exit 1
+}
 
 # Create all necessary directories
 print_status "Creating directory structure..."
@@ -44,7 +56,7 @@ mkdir -p /opt/filterdns/web
 mkdir -p /var/log/named
 
 # Fix BIND configuration
-print_status "Fixing BIND configuration..."
+print_status "Configuring BIND..."
 
 # Update named.conf.options
 cat > /etc/bind/named.conf.options << EOF
@@ -687,15 +699,13 @@ class FilterDNSHandler(http.server.SimpleHTTPRequestHandler):
         parsed_url = urlparse(self.path)
         path = parsed_url.path
         
-        # Set CORS headers
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-        
         # API endpoints
         if path == '/api/status':
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
             self.end_headers()
             
             # Get DNS server status
@@ -726,6 +736,9 @@ class FilterDNSHandler(http.server.SimpleHTTPRequestHandler):
         elif path == '/api/stats':
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
             self.end_headers()
             
             # Combine statistics from different sources
@@ -783,6 +796,9 @@ class FilterDNSHandler(http.server.SimpleHTTPRequestHandler):
         elif path == '/api/config':
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
             self.end_headers()
             
             # Get configuration information
@@ -856,6 +872,7 @@ class FilterDNSHandler(http.server.SimpleHTTPRequestHandler):
                 else:
                     self.send_header('Content-type', 'text/plain')
                 
+                self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 
                 with open(file_path, 'rb') as f:
@@ -863,6 +880,7 @@ class FilterDNSHandler(http.server.SimpleHTTPRequestHandler):
             else:
                 self.send_response(404)
                 self.send_header('Content-type', 'text/plain')
+                self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 self.wfile.write(b'File not found')
     
@@ -870,11 +888,6 @@ class FilterDNSHandler(http.server.SimpleHTTPRequestHandler):
         # Parse URL
         parsed_url = urlparse(self.path)
         path = parsed_url.path
-        
-        # Set CORS headers
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         
         # Read request body
         content_length = int(self.headers['Content-Length'])
@@ -889,6 +902,9 @@ class FilterDNSHandler(http.server.SimpleHTTPRequestHandler):
         if path == '/api/control':
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
             self.end_headers()
             
             action = data.get('action', '')
@@ -1013,6 +1029,7 @@ class FilterDNSHandler(http.server.SimpleHTTPRequestHandler):
         else:
             self.send_response(404)
             self.send_header('Content-type', 'text/plain')
+            self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             self.wfile.write(b'Endpoint not found')
     
@@ -1594,6 +1611,111 @@ cat > /opt/filterdns/web/index.html << 'EOF'
 </html>
 EOF
 
+# Create a simple test page
+cat > /opt/filterdns/web/test.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FilterDNS Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            background-color: #f5f5f5;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+        }
+        
+        .success {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>FilterDNS Test Page</h1>
+        <p class="success">If you can see this page, the web server is working correctly!</p>
+        <p>This is a simple test page to verify that the FilterDNS web interface is accessible.</p>
+        <p>You can now try accessing the main interface at: <a href="/">FilterDNS Dashboard</a></p>
+    </div>
+</body>
+</html>
+EOF
+
+# Configure Nginx as a reverse proxy for the API server
+print_status "Configuring Nginx as a reverse proxy..."
+cat > /etc/nginx/sites-available/filterdns << EOF
+server {
+    listen 80;
+    server_name _;
+    
+    access_log /var/log/nginx/filterdns.access.log;
+    error_log /var/log/nginx/filterdns.error.log;
+    
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    }
+}
+EOF
+
+# Enable the Nginx site
+ln -sf /etc/nginx/sites-available/filterdns /etc/nginx/sites-enabled/
+rm -f /etc/nginx/sites-enabled/default
+
+# Configure Fail2Ban for security
+print_status "Configuring Fail2Ban for security..."
+cat > /etc/fail2ban/jail.d/filterdns.conf << EOF
+[nginx-http-auth]
+enabled = true
+port    = http,https
+filter  = nginx-http-auth
+logpath = /var/log/nginx/error.log
+maxretry = 5
+findtime = 600
+bantime = 3600
+
+[nginx-badbots]
+enabled = true
+port    = http,https
+filter  = nginx-badbots
+logpath = /var/log/nginx/access.log
+maxretry = 3
+findtime = 600
+bantime = 86400
+EOF
+
+# Configure UFW firewall
+print_status "Configuring firewall..."
+ufw allow 53/tcp
+ufw allow 53/udp
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw allow 22/tcp
+ufw --force enable
+
 # Create systemd service for BIND logging
 print_status "Creating systemd services..."
 cat > /etc/systemd/system/filterdns-logger.service << EOF
@@ -1722,11 +1844,32 @@ for category in adult malware ads tracking; do
   mkdir -p "/opt/filterdns/data/blocklists/$category"
 done
 
+# Optimize system for DNS server
+print_status "Optimizing system for DNS server..."
+cat >> /etc/sysctl.conf << EOF
+
+# Optimizations for DNS server
+net.core.rmem_max = 8388608
+net.core.wmem_max = 8388608
+net.ipv4.tcp_rmem = 4096 87380 8388608
+net.ipv4.tcp_wmem = 4096 65536 8388608
+net.ipv4.tcp_max_syn_backlog = 4096
+net.core.netdev_max_backlog = 2500
+net.ipv4.tcp_fastopen = 3
+EOF
+
+# Apply sysctl settings
+sysctl -p
+
 # Enable and start services
 print_status "Enabling and starting services..."
 systemctl daemon-reload
 systemctl enable bind9
 systemctl restart bind9
+systemctl enable nginx
+systemctl restart nginx
+systemctl enable fail2ban
+systemctl restart fail2ban
 systemctl enable filterdns-api.service
 systemctl start filterdns-api.service
 systemctl enable filterdns-logger.timer
@@ -1753,8 +1896,15 @@ echo "  - Content filtering is enabled with Response Policy Zones (RPZ)"
 echo "  - Blocklists are automatically updated daily at 3:00 AM"
 echo
 echo "Web Interface:"
-echo "  - Access the web interface at http://${SERVER_IP}:8080"
+echo "  - Access the web interface at http://${SERVER_IP}"
+echo "  - Nginx is configured as a reverse proxy for better performance and security"
 echo "  - Use the web interface to manage filtering categories and view statistics"
+echo "  - A test page is available at http://${SERVER_IP}/test.html"
+echo
+echo "Security Features:"
+echo "  - Fail2Ban is configured to protect against brute force attacks"
+echo "  - UFW firewall is enabled and configured to allow only necessary ports"
+echo "  - System is optimized for DNS server performance"
 echo
 echo "DNS Server Management:"
 echo "  - Control the DNS server with: /opt/filterdns/bin/dns-control.sh"
@@ -1766,10 +1916,15 @@ echo "  1. Configure your devices to use ${SERVER_IP} as the DNS server"
 echo "  2. Or configure your router to use this server as the DNS server for your network"
 echo
 echo "For more information, check the logs at:"
-echo "  - /var/log/syslog (for BIND logs)"
+echo "  - /var/log/syslog (for system logs)"
+echo "  - /var/log/nginx/filterdns.access.log (for web interface access logs)"
+echo "  - /var/log/named/query.log (for DNS query logs)"
 echo "  - /opt/filterdns/logs/blocklist-update.log (for blocklist updates)"
 echo
-echo -e "${YELLOW}Note: This is a basic setup. For production use, consider adding SSL/TLS encryption and authentication to the web interface.${NC}"
+echo -e "${YELLOW}Note: For production use, consider setting up SSL/TLS with Let's Encrypt:${NC}"
+echo "  sudo certbot --nginx -d yourdomain.com"
+echo
+echo "Setup completed successfully!"
 echo
 
 exit 0
