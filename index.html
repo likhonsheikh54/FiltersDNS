@@ -1,1 +1,559 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FilterDNS - A complete all-in-one DNS filtering server with web interface, content blocking, and security features">
+    <meta name="keywords" content="DNS, filtering, content blocking, server, Nginx, BIND9, web interface, security">
+    <meta name="author" content="Likhon Sheikh">
+    <meta property="og:title" content="FilterDNS - DNS Filtering Server">
+    <meta property="og:description" content="A comprehensive DNS filtering solution to block unwanted content across your entire network">
+    <meta property="og:image" content="images/filterdns-logo.png">
+    <meta property="og:url" content="https://github.com/likhonsheikh54/FiltersDNS">
+    <title>FilterDNS - Complete DNS Filtering Server</title>
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #2ecc71;
+            --text-color: #333;
+            --light-color: #f5f5f5;
+            --dark-color: #222;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-color);
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        header .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo {
+            max-width: 150px;
+            margin-bottom: 1rem;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .hero {
+            background: linear-gradient(rgba(44, 62, 80, 0.8), rgba(44, 62, 80, 0.8)), url('images/hero-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+        
+        .hero h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #2980b9;
+        }
+        
+        .features {
+            padding: 4rem 0;
+            background-color: white;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-title h2 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .section-title p {
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background-color: var(--light-color);
+            border-radius: 5px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .installation {
+            padding: 4rem 0;
+            background-color: var(--light-color);
+        }
+        
+        .code-block {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        
+        .code-block code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        
+        .usage {
+            padding: 4rem 0;
+            background-color: white;
+        }
+        
+        .usage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .usage-card {
+            background-color: var(--light-color);
+            border-radius: 5px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .usage-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .usage-card ul {
+            list-style-position: inside;
+            margin-bottom: 1rem;
+        }
+        
+        .usage-card li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .screenshots {
+            padding: 4rem 0;
+            background-color: var(--light-color);
+        }
+        
+        .screenshot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .screenshot-item {
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .screenshot-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+        
+        .screenshot-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        .faq {
+            padding: 4rem 0;
+            background-color: white;
+        }
+        
+        .faq-item {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1.5rem;
+        }
+        
+        .faq-item h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+        
+        .cta {
+            padding: 4rem 0;
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+        }
+        
+        .cta h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .cta p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+        
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        footer p {
+            margin-bottom: 1rem;
+        }
+        
+        footer a {
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .social-links {
+            margin-top: 1rem;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            margin: 0 0.5rem;
+            font-size: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .hero h2 {
+                font-size: 1.8rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <img src="images/filterdns-logo.png" alt="FilterDNS Logo" class="logo">
+            <h1>FilterDNS</h1>
+            <p>Complete DNS Filtering Server with Web Interface</p>
+        </div>
+    </header>
+    
+    <section class="hero">
+        <div class="container">
+            <h2>Protect Your Network with Advanced DNS Filtering</h2>
+            <p>FilterDNS is a comprehensive, all-in-one DNS filtering server solution with a web interface, powered by BIND9 and Nginx. Block unwanted content across your entire network with just one installation.</p>
+            <div>
+                <a href="#installation" class="btn">Get Started</a>
+                <a href="docs/index.html" class="btn btn-secondary">Documentation</a>
+            </div>
+        </div>
+    </section>
+    
+    <section class="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Key Features</h2>
+                <p>FilterDNS comes packed with everything you need for effective content filtering</p>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Content Filtering</h3>
+                    <p>Block adult content, malware, ads, and tracking domains across your entire network with regularly updated blocklists.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🖥️</div>
+                    <h3>Web Interface</h3>
+                    <p>Manage your DNS server through an intuitive web dashboard with real-time statistics and easy configuration.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Automatic Updates</h3>
+                    <p>Daily blocklist updates ensure you're always protected against the latest threats and unwanted content.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Statistics & Monitoring</h3>
+                    <p>Track DNS queries, blocked domains, and system performance with detailed analytics.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Enhanced Security</h3>
+                    <p>Integrated with Fail2Ban and UFW firewall to protect your server from attacks.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Optimized Performance</h3>
+                    <p>System-level optimizations ensure your DNS server operates at peak efficiency.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="installation" id="installation">
+        <div class="container">
+            <div class="section-title">
+                <h2>Quick Installation</h2>
+                <p>Get up and running with a single command</p>
+            </div>
+            
+            <p>Install FilterDNS with this one-line command:</p>
+            <div class="code-block">
+                <code>curl -sSL https://raw.githubusercontent.com/likhonsheikh54/FiltersDNS/main/dns.sh | sudo bash</code>
+            </div>
+            
+            <p>Or download and run the script manually:</p>
+            <div class="code-block">
+                <code>wget https://raw.githubusercontent.com/likhonsheikh54/FiltersDNS/main/dns.sh<br>
+chmod +x dns.sh<br>
+sudo ./dns.sh</code>
+            </div>
+            
+            <p>After installation completes:</p>
+            <ol>
+                <li>Access the web interface at <code>http://YOUR_SERVER_IP</code></li>
+                <li>Configure your network devices to use your server's IP as the DNS server</li>
+                <li>Test the filtering by visiting <code>http://YOUR_SERVER_IP/test.html</code></li>
+            </ol>
+        </div>
+    </section>
+    
+    <section class="usage">
+        <div class="container">
+            <div class="section-title">
+                <h2>How to Use</h2>
+                <p>FilterDNS is easy to manage through both web interface and command line</p>
+            </div>
+            
+            <div class="usage-grid">
+                <div class="usage-card">
+                    <h3>Web Interface</h3>
+                    <p>The web interface allows you to:</p>
+                    <ul>
+                        <li>Monitor server status and statistics</li>
+                        <li>Enable/disable filtering categories</li>
+                        <li>View top queried and blocked domains</li>
+                        <li>Start, stop, or restart the DNS server</li>
+                        <li>Update blocklists manually</li>
+                    </ul>
+                    <p>Access at: <code>http://YOUR_SERVER_IP</code></p>
+                </div>
+                
+                <div class="usage-card">
+                    <h3>Command Line</h3>
+                    <p>Control FilterDNS from the command line:</p>
+                    <div class="code-block">
+                        <code>sudo /opt/filterdns/bin/dns-control.sh [command]</code>
+                    </div>
+                    <p>Available commands:</p>
+                    <ul>
+                        <li><code>status</code>: Show DNS server status</li>
+                        <li><code>start</code>: Start DNS server</li>
+                        <li><code>stop</code>: Stop DNS server</li>
+                        <li><code>restart</code>: Restart DNS server</li>
+                        <li><code>update</code>: Update blocklists</li>
+                        <li><code>enable [category]</code>: Enable a category</li>
+                        <li><code>disable [category]</code>: Disable a category</li>
+                        <li><code>stats</code>: Show DNS server statistics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="screenshots">
+        <div class="container">
+            <div class="section-title">
+                <h2>Screenshots</h2>
+                <p>See FilterDNS in action</p>
+            </div>
+            
+            <div class="screenshot-grid">
+                <div class="screenshot-item">
+                    <img src="images/dashboard.png" alt="FilterDNS Dashboard">
+                </div>
+                <div class="screenshot-item">
+                    <img src="images/statistics.png" alt="FilterDNS Statistics">
+                </div>
+                <div class="screenshot-item">
+                    <img src="images/categories.png" alt="FilterDNS Categories">
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="faq">
+        <div class="container">
+            <div class="section-title">
+                <h2>Frequently Asked Questions</h2>
+                <p>Common questions about FilterDNS</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3>What is DNS filtering?</h3>
+                <p>DNS filtering blocks access to specific websites or content by preventing DNS resolution of domain names. When a user tries to access a blocked domain, the DNS server returns an error or redirects to a block page instead of the actual IP address.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3>What content categories can be blocked?</h3>
+                <p>FilterDNS includes blocklists for adult content, malware, ads, and tracking domains. You can enable or disable each category independently, and add custom domains to block or whitelist.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3>How do I add custom domains to block?</h3>
+                <p>You can add custom domains to block by editing the file at <code>/opt/filterdns/data/blocklists/custom.txt</code> and then running <code>sudo /opt/filterdns/bin/dns-control.sh update</code> to apply the changes.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3>Can I use FilterDNS on my home network?</h3>
+                <p>Yes! FilterDNS is perfect for home networks. Install it on any Ubuntu server or virtual machine, then configure your router to use it as the DNS server for your entire network.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3>Is FilterDNS suitable for business use?</h3>
+                <p>Absolutely. FilterDNS can be deployed in business environments to enforce content policies, block malware, and protect your network. For production environments, we recommend setting up SSL/TLS with Let's Encrypt for the web interface.</p>
+            </div>
+        </div>
+    </section>
+    
+    <section class="cta">
+        <div class="container">
+            <h2>Ready to Get Started?</h2>
+            <p>Install FilterDNS today and take control of your network's content filtering.</p>
+            <a href="https://github.com/likhonsheikh54/FiltersDNS" class="btn">Download Now</a>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="container">
+            <p>FilterDNS &copy; 2025 | Created by <a href="https://github.com/likhonsheikh54">Likhon Sheikh</a></p>
+            <p><a href="docs/index.html">Documentation</a> | <a href="https://github.com/likhonsheikh54/FiltersDNS/issues">Report Issues</a> | <a href="https://github.com/likhonsheikh54/FiltersDNS">GitHub Repository</a></p>
+            <div class="social-links">
+                <a href="https://github.com/likhonsheikh54" aria-label="GitHub">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                </a>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Simple JavaScript for smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
